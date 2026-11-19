@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Yönetim - Vexora</title>
+<style>
+:root{--bg:#070b0d;--panel:#0d1417;--line:#1d2a30;--green:#2bff9e;--text:#dfe6eb;--muted:#7d8b94}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,"Segoe UI",sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line)}
+header b{color:var(--green)}
+main{max-width:1000px;margin:0 auto;padding:24px}
+h2{font-size:18px;margin:28px 0 12px;color:var(--green)}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 4px}
+input,textarea{width:100%;background:#091013;border:1px solid var(--line);color:var(--text);padding:10px;border-radius:8px;font:inherit}
+textarea{min-height:70px;resize:vertical}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+.check{display:flex;align-items:center;gap:8px;margin-top:8px}
+.check input{width:auto}
+.check label{margin:0;color:var(--text)}
+button{background:var(--green);color:#03150d;border:0;padding:10px 16px;border-radius:8px;font-weight:700;cursor:pointer}
+button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+button.danger{background:#3a1116;color:#ff7a8a}
+.bar{display:flex;gap:12px;align-items:center;margin-top:20px;position:sticky;bottom:0;background:var(--bg);padding:14px 0}
+#status{color:var(--muted);font-size:14px}
+.muted{color:var(--muted)}
+@media(max-width:640px){.card{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div><b>Vexora</b> Yönetim</div>
+  <div><span id="who" class="muted"></span> <button class="ghost" id="logout">Çıkış</button></div>
+</header>
+
+<main>
+  <h2>Site Ayarları</h2>
+  <div class="card">
+    <div><label>Hero başlığı</label><input data-s="heroTitle"></div>
+    <div><label>Hero alt başlık</label><input data-s="heroSubtitle"></div>
+    <div class="full"><label>Discord davet linki</label><input data-s="discordInvite" placeholder="https://discord.gg/..."></div>
+  </div>
+
+  <h2>Ürünler / Modellemeler</h2>
+  <div id="products"></div>
+  <button class="ghost" id="add">+ Ürün ekle</button>
+
+  <div class="bar">
+    <button id="save">Kaydet</button>
+    <span id="status"></span>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) =>
+  String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+
+let state = { settings: {}, products: [] };
+
+function renderSettings() {
+  document.querySelectorAll('[data-s]').forEach((el) => {
+    el.value = state.settings[el.dataset.s] || '';
+  });
+}
+
+function renderProducts() {
+  $('products').innerHTML =
+    state.products.map((p, i) => `
+      <div class="card">
+        <div><label>Ad</label><input data-i="${i}" data-f="name" value="${esc(p.name)}"></div>
+        <div><label>Fiyat</label><input data-i="${i}" data-f="price" value="${esc(p.price)}" placeholder="₺250"></div>
+        <div class="full"><label>Açıklama</label><textarea data-i="${i}" data-f="description">${esc(p.description)}</textarea></div>
+        <div><label>Görsel (ör: /assets/urun1.png veya https://...)</label><input data-i="${i}" data-f="image" value="${esc(p.image)}"></div>
+        <div><label>Satın alma linki</label><input data-i="${i}" data-f="buyUrl" value="${esc(p.buyUrl)}"></div>
+        <div><label>Rozet (ör: Yeni)</label><input data-i="${i}" data-f="badge" value="${esc(p.badge)}"></div>
+        <div class="check">
+          <input type="checkbox" id="f${i}" data-i="${i}" data-f="featured" ${p.featured ? 'checked' : ''}>
+          <label for="f${i}">Öne çıkar</label>
+        </div>
+        <div class="full"><button class="danger" data-del="${i}">Ürünü sil</button></div>
+      </div>`).join('') || '<p class="muted">Henüz ürün yok.</p>';
+}
+
+function onField(e) {
+  const t = e.target;
+  if (t.dataset.s) {
+    state.settings[t.dataset.s] = t.value;
+    return;
+  }
+  if (t.dataset.i !== undefined && t.dataset.f) {
+    state.products[+t.dataset.i][t.dataset.f] =
+      t.type === 'checkbox' ? t.checked : t.value;
+  }
+}
+['input', 'change'].forEach((ev) => document.addEventListener(ev, onField));
+
+document.addEventListener('click', (e) => {
+  const d = e.target.dataset.del;
+  if (d !== undefined && confirm('Bu ürün silinsin mi?')) {
+    state.products.splice(+d, 1);
+    renderProducts();
+  }
+});
+
+$('add').onclick = () => {
+  state.products.push({
+    id: crypto.randomUUID(), name: '', price: '', description: '',
+    image: '', buyUrl: '', badge: '', featured: false,
+  });
+  renderProducts();
+};
+
+$('save').onclick = async () => {
+  $('status').textContent = 'Kaydediliyor...';
+  const r = await fetch('/api/data', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(state),
+  });
+  $('status').textContent = r.ok ? 'Kaydedildi ✓' : `Hata: ${r.status}`;
+};
+
+$('logout').onclick = () => (location.href = '/api/auth/logout');
+
+(async function init() {
+  const me = await fetch('/api/auth/me');
+  if (me.ok) $('who').textContent = (await me.json()).name;
+
+  const r = await fetch('/api/data');
+  const d = await r.json();
+  state = { settings: d.settings || {}, products: d.products || [] };
+  renderSettings();
+  renderProducts();
+})();
+</script>
+</body>
+</html>

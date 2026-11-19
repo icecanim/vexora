@@ -1,0 +1,17 @@
+{
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/yonetim", "destination": "/api/yonetim" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    }
+  ],
+  "functions": {
+    "api/yonetim.js": {
+      "includeFiles": "{admin/**,public/404.html}"
+    }
+  }
+}

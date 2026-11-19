@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vexora Modelling</title>
+<meta name="description" content="Vexora Modelling - GMod player modelling">
+<link rel="icon" href="/assets/logo.png">
+<style>
+:root{--bg:#05080a;--panel:#0b1114;--line:#18242a;--green:#2bff9e;--green2:#12b77a;--silver:#d5dce2;--muted:#7f8c95}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--silver);font-family:"Segoe UI",system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block}
+
+/* ---------- GİRİŞ ANİMASYONU ---------- */
+#intro{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#0d2c22 0%,#000 65%);transition:opacity .9s ease,visibility .9s;overflow:hidden}
+#intro.done{opacity:0;visibility:hidden}
+#intro .glow{position:absolute;width:70vmin;height:70vmin;border-radius:50%;background:radial-gradient(circle,rgba(43,255,158,.35),transparent 65%);opacity:0;animation:glow 2.4s ease .3s forwards}
+#intro .logo{position:relative;width:min(440px,72vw);opacity:0;transform:scale(.88);animation:logoIn 1.8s cubic-bezier(.2,.7,.2,1) .2s forwards}
+#intro .sweep{position:absolute;top:0;bottom:0;left:0;width:35%;background:linear-gradient(90deg,transparent,rgba(43,255,158,.22),transparent);transform:translateX(-120%);animation:sweep 1.5s ease-in-out 1.4s forwards}
+#intro .skip{position:absolute;bottom:28px;right:28px;background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:13px}
+@keyframes logoIn{from{opacity:0;transform:scale(.88);filter:blur(16px) brightness(2)}to{opacity:1;transform:scale(1);filter:blur(0) brightness(1)}}
+@keyframes glow{to{opacity:1}}
+@keyframes sweep{to{transform:translateX(330%)}}
+
+/* ---------- NAV ---------- */
+.nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;background:rgba(5,8,10,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .brand img{height:44px;width:auto}
+.nav nav a{margin-left:22px;color:var(--muted);font-size:15px;transition:color .2s}
+.nav nav a:hover{color:var(--green)}
+
+/* ---------- HERO ---------- */
+.hero{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 6vw;background:radial-gradient(circle at 50% 30%,#0c2a20 0%,transparent 60%)}
+.hero .big{width:min(480px,80vw);animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+.hero h1{font-size:clamp(28px,4vw,46px);margin-top:18px;letter-spacing:.5px}
+.hero p{color:var(--muted);margin:10px 0 28px;font-size:clamp(15px,1.6vw,18px)}
+.cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{display:inline-block;padding:13px 26px;border-radius:999px;background:linear-gradient(135deg,var(--green),var(--green2));color:#03150d;font-weight:700;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(43,255,158,.3)}
+.btn.ghost{background:transparent;color:var(--green);border:1px solid var(--green2)}
+.btn.small{padding:9px 16px;font-size:14px}
+
+/* ---------- ÜRÜNLER ---------- */
+.products{padding:80px 5vw;max-width:1200px;margin:0 auto}
+.products h2{font-size:30px;text-align:center;margin-bottom:40px}
+.products h2::after{content:"";display:block;width:60px;height:3px;background:var(--green);margin:12px auto 0;border-radius:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:transform .25s,border-color .25s}
+.card:hover{transform:translateY(-6px);border-color:var(--green2)}
+.thumb{aspect-ratio:4/3;background:#070c0e}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.body{padding:18px}
+.badge{display:inline-block;font-size:12px;background:rgba(43,255,158,.12);color:var(--green);padding:3px 10px;border-radius:999px;margin-bottom:8px}
+.body h3{font-size:18px;margin-bottom:6px}
+.body p{color:var(--muted);font-size:14px;line-height:1.5;min-height:42px;white-space:pre-line}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.price{font-weight:700;color:#fff;font-size:18px}
+.muted{color:var(--muted)}
+footer{text-align:center;padding:40px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<!-- GİRİŞ ANİMASYONU -->
+<div id="intro">
+  <div class="glow"></div>
+  <img class="logo" src="/assets/logo.png" alt="Vexora Modelling">
+  <div class="sweep"></div>
+  <button class="skip" type="button">Geç</button>
+</div>
+
+<header class="nav">
+  <a href="/" class="brand"><img src="/assets/logo.png" alt="Vexora"></a>
+  <nav>
+    <a href="#urunler">Ürünler</a>
+    <a id="discordNav" href="#" target="_blank" rel="noopener">Discord</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <img class="big" src="/assets/logo.png" alt="Vexora Modelling">
+  <h1 id="heroTitle">Vexora Modelling</h1>
+  <p id="heroSubtitle">GMod için özel player modelling</p>
+  <div class="cta">
+    <a class="btn" href="#urunler">Ürünleri Gör</a>
+    <a id="discordHero" class="btn ghost" href="#" target="_blank" rel="noopener">Discord'a Katıl</a>
+  </div>
+</section>
+
+<section id="urunler" class="products">
+  <h2>Ürünler</h2>
+  <div id="grid" class="grid"><p class="muted">Yükleniyor...</p></div>
+</section>
+
+<footer>© <span id="year"></span> Vexora Modelling</footer>
+
+<script>
+// Giriş animasyonu: bir oturumda bir kere oynar, tıklayınca geçilir
+(function () {
+  const intro = document.getElementById('intro');
+  const end = () => {
+    intro.classList.add('done');
+    sessionStorage.setItem('vx_intro', '1');
+  };
+  if (sessionStorage.getItem('vx_intro')) intro.classList.add('done');
+  else setTimeout(end, 3600);
+  intro.querySelector('.skip').addEventListener('click', end);
+})();
+
+const esc = (s) =>
+  String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+
+function productCard(p, fallbackLink) {
+  const href = esc(p.buyUrl || fallbackLink);
+  return `
+    <article class="card">
+      ${p.image ? `<div class="thumb"><img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy"></div>` : ''}
+      <div class="body">
+        ${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ''}
+        <h3>${esc(p.name)}</h3>
+        <p>${esc(p.description)}</p>
+        <div class="row">
+          <span class="price">${esc(p.price)}</span>
+          <a class="btn small" href="${href}" target="_blank" rel="noopener">Satın Al</a>
+        </div>
+      </div>
+    </article>`;
+}
+
+async function load() {
+  const grid = document.getElementById('grid');
+  try {
+    const r = await fetch('/api/data');
+    if (!r.ok) throw new Error(r.status);
+    const { settings = {}, products = [] } = await r.json();
+
+    if (settings.heroTitle) document.getElementById('heroTitle').textContent = settings.heroTitle;
+    if (settings.heroSubtitle) document.getElementById('heroSubtitle').textContent = settings.heroSubtitle;
+
+    const invite = settings.discordInvite || '#';
+    document.getElementById('discordNav').href = invite;
+    document.getElementById('discordHero').href = invite;
+
+    const sorted = [...products].sort((a, b) => Number(b.featured) - Number(a.featured));
+    grid.innerHTML = sorted.length
+      ? sorted.map((p) => productCard(p, invite)).join('')
+      : '<p class="muted">Yakında ürünler eklenecek.</p>';
+  } catch (e) {
+    grid.innerHTML = '<p class="muted">Ürünler yüklenemedi.</p>';
+  }
+}
+
+document.getElementById('year').textContent = new Date().getFullYear();
+load();
+</script>
+</body>
+</html>
