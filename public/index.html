@@ -48,12 +48,12 @@ h2.title{font-size:clamp(26px,3.6vw,40px);margin-bottom:14px;line-height:1.2}
 html.has-cursor,html.has-cursor *{cursor:none!important}
 
 /* ---------- GİRİŞ ANİMASYONU ---------- */
-#intro{position:fixed;inset:0;z-index:999;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#0b1f19 0%,#000 70%);display:flex;align-items:center;justify-content:center;transition:opacity 1.2s ease,visibility 1.2s}
+#intro{position:fixed;inset:0;z-index:999;background:#000;overflow:hidden;transition:opacity 1s ease,visibility 1s}
 #intro.fading{opacity:0}
 #intro.done{visibility:hidden;pointer-events:none}
-#intro .cobra{width:min(720px,92vw);height:auto;mix-blend-mode:screen;animation:introIn .9s ease both}
-@keyframes introIn{from{opacity:0;transform:scale(.97);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
-#intro .skip{position:absolute;bottom:28px;right:28px;z-index:2;background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:13px}
+#intro .cobra{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;animation:introIn .6s ease both}
+@keyframes introIn{from{opacity:0}to{opacity:1}}
+#intro .skip{position:absolute;bottom:28px;right:28px;z-index:2;background:rgba(0,0,0,.4);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:13px}
 
 /* ---------- NAV ---------- */
 .nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;background:rgba(5,8,10,.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(43,255,158,.08)}
@@ -201,7 +201,7 @@ footer .brandf img{height:34px;width:auto}
 
 <!-- GİRİŞ ANİMASYONU -->
 <div id="intro">
-  <img class="cobra" src="/assets/intro-cobra.gif" alt="Vexora Modelling">
+  <img class="cobra" src="/assets/intro-cobra.gif" alt="">
   <button class="skip" type="button">Geç</button>
 </div>
 
@@ -360,14 +360,13 @@ const esc = (s) =>
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
-/* ---- Giriş: GIF bir kez oynar, son karede kalır ve yumuşakça kaybolur ---- */
+/* ---- Giriş: GIF tam ekran oynar, karardığında sayfa yumuşakça kaybolur ---- */
 (function () {
   const intro = document.getElementById('intro');
   if (!intro) return;
   const cobra = intro.querySelector('.cobra');
-  const DUR = 3000;          // GIF'in toplam süresi (ms)
-  const SWAP = DUR - 30;     // son kareye geçiş anı (ms)
-  const FADE = 1200;         // kaybolma süresi (ms)
+  const FADE_AT = 2000;      // GIF kararmaya başlarken fade-out'a geç (ms)
+  const FADE = 1000;         // kaybolma süresi (ms)
   let finished = false;
   let fading = false;
 
@@ -387,10 +386,7 @@ const esc = (s) =>
   intro.querySelector('.skip').addEventListener('click', fadeOut);
   if (sessionStorage.getItem('vx_intro') || reduce) { finish(); return; }
 
-  const begin = () => {
-    setTimeout(() => { cobra.src = '/assets/intro-cobra-last.png'; }, SWAP);
-    setTimeout(fadeOut, SWAP);
-  };
+  const begin = () => setTimeout(fadeOut, FADE_AT);
   if (cobra.complete && cobra.naturalWidth) begin();
   else cobra.addEventListener('load', begin, { once: true });
   cobra.addEventListener('error', fadeOut, { once: true });
