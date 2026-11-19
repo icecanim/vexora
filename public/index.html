@@ -48,15 +48,23 @@ h2.title{font-size:clamp(26px,3.6vw,40px);margin-bottom:14px;line-height:1.2}
 html.has-cursor,html.has-cursor *{cursor:none!important}
 
 /* ---------- GİRİŞ ANİMASYONU ---------- */
-#intro{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#0d2c22 0%,#000 65%);transition:opacity .9s ease,visibility .9s;overflow:hidden}
-#intro.done{opacity:0;visibility:hidden}
-#intro .glow{position:absolute;width:70vmin;height:70vmin;border-radius:50%;background:radial-gradient(circle,rgba(43,255,158,.35),transparent 65%);opacity:0;animation:glow 2.4s ease .3s forwards}
-#intro .logo{position:relative;width:min(440px,72vw);opacity:0;transform:scale(.88);animation:logoIn 1.8s cubic-bezier(.2,.7,.2,1) .2s forwards}
-#intro .sweep{position:absolute;top:0;bottom:0;left:0;width:35%;background:linear-gradient(90deg,transparent,rgba(43,255,158,.22),transparent);transform:translateX(-120%);animation:sweep 1.5s ease-in-out 1.4s forwards}
-#intro .skip{position:absolute;bottom:28px;right:28px;background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:13px}
-@keyframes logoIn{from{opacity:0;transform:scale(.88);filter:blur(16px) brightness(2)}to{opacity:1;transform:scale(1);filter:blur(0) brightness(1)}}
-@keyframes glow{to{opacity:1}}
-@keyframes sweep{to{transform:translateX(330%)}}
+#intro{position:fixed;inset:0;z-index:999;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#0f3327 0%,#03080a 58%,#000 100%);transition:opacity 1s ease,visibility 1s;display:flex;align-items:center;justify-content:center}
+#intro.done{opacity:0;visibility:hidden;pointer-events:none}
+#introFx{position:absolute;inset:0;width:100%;height:100%}
+.intro-glow{position:absolute;left:50%;top:50%;width:90vmin;height:90vmin;border-radius:50%;background:radial-gradient(circle,rgba(43,255,158,.22),transparent 62%);transform:translate(-50%,-50%) scale(.5);opacity:0;transition:opacity 1.4s ease,transform 1.6s cubic-bezier(.16,1,.3,1)}
+#intro.ig .intro-glow{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#introSnake{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transition:opacity .4s linear}
+.ilogo{position:absolute;left:50%;top:50%;width:min(400px,70vw);opacity:0;transform:translate(-50%,-50%) scale(1.6);filter:blur(20px);transition:opacity .9s ease,transform 1.1s cubic-bezier(.16,1,.3,1),filter .9s ease;pointer-events:none}
+#intro.logo-in .ilogo{opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0) drop-shadow(0 0 26px rgba(43,255,158,.35))}
+.itag{position:absolute;left:50%;top:calc(50% + min(200px,36vw));transform:translateX(-50%);font-family:Orbitron,sans-serif;font-size:clamp(11px,1.3vw,14px);letter-spacing:6px;color:var(--green);text-shadow:0 0 12px rgba(43,255,158,.6);opacity:0;transition:opacity 1s ease,letter-spacing 1.8s ease;white-space:nowrap}
+#intro.tag-in .itag{opacity:1;letter-spacing:11px}
+.ishock{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;border:2px solid var(--green);box-shadow:0 0 30px var(--green);opacity:0;pointer-events:none}
+#intro.shock .ishock{animation:shock 1.1s ease-out forwards}
+@keyframes shock{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(16)}}
+.iflash{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(43,255,158,.35),transparent 55%);opacity:0;pointer-events:none}
+#intro.shock .iflash{animation:flash .8s ease-out forwards}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+#intro .skip{position:absolute;bottom:28px;right:28px;z-index:2;background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:13px}
 
 /* ---------- NAV ---------- */
 .nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;background:rgba(5,8,10,.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(43,255,158,.08)}
@@ -102,12 +110,6 @@ html.has-cursor,html.has-cursor *{cursor:none!important}
 .track span{display:inline-flex;align-items:center;gap:46px}
 .track span::after{content:"✦";color:var(--green);text-shadow:0 0 10px var(--green)}
 @keyframes tick{to{transform:translateX(-50%)}}
-
-/* ---------- YILAN MASKOTU ---------- */
-.mascot{background:radial-gradient(ellipse at 50% 60%,#0b2a20,transparent 65%)}
-.mascot svg{width:100%;height:auto;display:block;overflow:visible}
-.mascot .caption{text-align:center;margin-top:28px;color:var(--muted);font-size:15px}
-.mascot .caption b{color:#fff;font-family:Orbitron,sans-serif;font-size:18px;letter-spacing:1px;display:block;margin-bottom:6px}
 
 /* ---------- HİZMETLER ---------- */
 .feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px}
@@ -210,9 +212,46 @@ footer .brandf img{height:34px;width:auto}
 
 <!-- GİRİŞ ANİMASYONU -->
 <div id="intro">
-  <div class="glow"></div>
-  <img class="logo" src="/assets/logo.png" alt="Vexora Modelling">
-  <div class="sweep"></div>
+  <canvas id="introFx"></canvas>
+  <div class="intro-glow"></div>
+  <svg id="introSnake" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <defs>
+      <radialGradient id="gBody" cx="35%" cy="30%" r="80%">
+        <stop offset="0%" stop-color="#ffe2a0"/>
+        <stop offset="40%" stop-color="#d9a04a"/>
+        <stop offset="100%" stop-color="#4a2a0e"/>
+      </radialGradient>
+      <radialGradient id="gHood" cx="50%" cy="40%" r="70%">
+        <stop offset="0%" stop-color="#e7b25c"/>
+        <stop offset="100%" stop-color="#2e1a07"/>
+      </radialGradient>
+      <filter id="gGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <g id="iBody" filter="url(#gGlow)"></g>
+    <g id="iHead" filter="url(#gGlow)">
+      <g id="iHood"><ellipse cx="-6" cy="0" rx="13" ry="24" fill="url(#gHood)"/></g>
+      <path d="M-10,-14 Q14,-18 26,-4 Q31,0 26,4 Q14,16 -10,14 Z" fill="url(#gBody)"/>
+      <path id="iMouthIn" d="M-7,-4 L26,-1 L26,2 L-7,4 Z" fill="#3a0010" opacity="0"/>
+      <g id="iUpper">
+        <path d="M-7,-7 Q14,-10 28,-2 Q31,0 26,1 Q12,-3 -7,-2 Z" fill="#e0a54f"/>
+        <path class="fang" d="M15,-2 L19.5,-2 L17.5,7 Z" fill="#ffffff" opacity="0"/>
+      </g>
+      <g id="iLower">
+        <path d="M-7,3 Q12,4 26,2 Q14,12 -9,12 Z" fill="#b87a33"/>
+        <path class="fang" d="M15,3 L19.5,3 L17.5,-4 Z" fill="#ffffff" opacity="0"/>
+      </g>
+      <circle cx="8" cy="-8" r="3.6" fill="#2bff9e"/>
+      <ellipse cx="8.8" cy="-8" rx="1" ry="2.6" fill="#03150d"/>
+      <g id="iTongue"><path d="M0,0 L16,0 M16,0 L23,-5 M16,0 L23,5" stroke="#ff4d6d" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>
+    </g>
+  </svg>
+  <img class="ilogo" src="/assets/logo.png" alt="Vexora Modelling">
+  <div class="itag">PLAYER MODELLING</div>
+  <div class="ishock"></div>
+  <div class="iflash"></div>
   <button class="skip" type="button">Geç</button>
 </div>
 
@@ -255,44 +294,6 @@ footer .brandf img{height:34px;width:auto}
     <span>Özel Player Modelling</span><span>GMod Uyumlu</span><span>Sınırsız Revizyon</span><span>Discord Destek</span><span>Sıfırdan Tasarım</span>
   </div>
 </div>
-
-<!-- YILAN MASKOTU -->
-<section class="mascot">
-  <div class="wrap">
-    <div class="head rv">
-      <span class="eyebrow">Maskotumuz</span>
-      <h2 class="title">Tanışın: Vexora</h2>
-      <p class="lead">Her modelde biraz Vexora var. Kıvrılır, bekler, karakterin her detayını izler.</p>
-    </div>
-    <div class="rv d1">
-      <svg id="snake" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <defs>
-          <radialGradient id="scale" cx="35%" cy="30%" r="75%">
-            <stop offset="0%" stop-color="#9dffd0"/>
-            <stop offset="45%" stop-color="#2bff9e"/>
-            <stop offset="100%" stop-color="#0a6b49"/>
-          </radialGradient>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <g id="snakeBody" filter="url(#glow)"></g>
-        <g id="snakeHead" filter="url(#glow)">
-          <circle r="17" fill="url(#scale)"/>
-          <circle cx="6" cy="-7" r="3.2" fill="#03150d"/>
-          <circle cx="6" cy="7" r="3.2" fill="#03150d"/>
-          <circle cx="7" cy="-8" r="1" fill="#fff"/>
-          <circle cx="7" cy="6" r="1" fill="#fff"/>
-          <g id="tongue" transform="translate(16,0)">
-            <path d="M0 0 L16 0 M16 0 L23 -5 M16 0 L23 5" stroke="#ff5577" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-          </g>
-        </g>
-      </svg>
-      <div class="caption"><b>Kıvrıl. Bekle. Modelle.</b>Vexora, her projede yanınızda.</div>
-    </div>
-  </div>
-</section>
 
 <!-- HİZMETLER -->
 <section id="hizmetler">
@@ -409,16 +410,161 @@ const esc = (s) =>
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 
-/* ---- Giriş animasyonu: bir oturumda bir kere ---- */
+/* ---- Giriş animasyonu: yılan yükselir, ağzını açar, logoya saldırır ---- */
 (function () {
   const intro = document.getElementById('intro');
-  const end = () => {
+  if (!intro) return;
+  let running = true;
+  const finish = () => {
+    if (intro.classList.contains('done')) return;
+    running = false;
     intro.classList.add('done');
     sessionStorage.setItem('vx_intro', '1');
   };
-  if (sessionStorage.getItem('vx_intro')) intro.classList.add('done');
-  else setTimeout(end, 3600);
-  intro.querySelector('.skip').addEventListener('click', end);
+  intro.querySelector('.skip').addEventListener('click', finish);
+  if (sessionStorage.getItem('vx_intro') || reduce) { finish(); return; }
+
+  /* parçacıklar */
+  const fc = document.getElementById('introFx');
+  const fctx = fc.getContext('2d');
+  let fw, fh, parts = [];
+  const fsize = () => {
+    fw = fc.width = fc.offsetWidth;
+    fh = fc.height = fc.offsetHeight;
+    parts = Array.from({ length: 60 }, () => ({
+      x: Math.random() * fw, y: Math.random() * fh,
+      r: Math.random() * 1.6 + 0.4, s: Math.random() * 0.6 + 0.2, a: Math.random() * 6.28,
+    }));
+  };
+  fsize();
+  addEventListener('resize', fsize);
+  const drawFx = () => {
+    if (!running) return;
+    fctx.clearRect(0, 0, fw, fh);
+    for (const p of parts) {
+      p.y -= p.s; p.a += 0.02;
+      if (p.y < -4) { p.y = fh + 4; p.x = Math.random() * fw; }
+      fctx.globalAlpha = 0.25 + 0.75 * Math.abs(Math.sin(p.a));
+      fctx.fillStyle = '#2bff9e';
+      fctx.beginPath();
+      fctx.arc(p.x, p.y, p.r, 0, 6.283);
+      fctx.fill();
+    }
+    requestAnimationFrame(drawFx);
+  };
+  requestAnimationFrame(drawFx);
+
+  /* yılan */
+  const NS = 'http://www.w3.org/2000/svg';
+  const bodyG = document.getElementById('iBody');
+  const headG = document.getElementById('iHead');
+  const hood = document.getElementById('iHood');
+  const upper = document.getElementById('iUpper');
+  const lower = document.getElementById('iLower');
+  const mouthIn = document.getElementById('iMouthIn');
+  const tongue = document.getElementById('iTongue');
+  const fangs = document.querySelectorAll('.fang');
+  const svg = document.getElementById('introSnake');
+
+  const N = 46;
+  const segs = [];
+  for (let i = 0; i < N; i++) {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('fill', i % 4 === 0 ? '#2a1a0c' : 'url(#gBody)');
+    bodyG.appendChild(c);
+    segs.push(c);
+  }
+
+  const clamp = (v) => Math.min(1, Math.max(0, v));
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+  const easeIn = (x) => x * x * x;
+  const lerp = (a, b, u) => a + (b - a) * u;
+  const COIL_END = 0.72;
+  const coil = (k) => {
+    const th = k * Math.PI * 2 * 2.2;
+    const r = 150 - 50 * k;
+    return [400 + r * Math.cos(th), 480 + r * 0.32 * Math.sin(th)];
+  };
+
+  const frame = (t) => {
+    const emerge = easeOut(seg(t, 0, 1100));
+    const rear = ease(seg(t, 950, 2000));
+    const mouth = ease(seg(t, 2000, 2400));
+    const hiss = Math.sin(Math.PI * seg(t, 2400, 2900));
+    const strike = easeIn(seg(t, 2900, 3150));
+    const fade = easeOut(seg(t, 3150, 3800));
+    const jump = -Math.sin(Math.PI * seg(t, 2750, 3200)) * 60;
+    const shake = Math.sin(t * 0.07) * 8 * hiss;
+    const dyE = (1 - emerge) * 260;
+
+    const headX = 400 + shake;
+    const headY = lerp(470, 210, rear) + 85 * strike;
+
+    const pts = [];
+    for (let i = 0; i < N; i++) {
+      const k = i / (N - 1);
+      let x, y;
+      if (k <= COIL_END) {
+        [x, y] = coil(k);
+      } else {
+        const [sx, sy] = coil(COIL_END);
+        const u = (k - COIL_END) / (1 - COIL_END);
+        const e = Math.pow(u, 1.15);
+        x = lerp(sx, headX, e) - 22 * Math.sin(Math.PI * u) * rear;
+        y = lerp(sy, headY, e);
+      }
+      pts.push([x, y + dyE + jump]);
+    }
+
+    for (let i = 0; i < N; i++) {
+      const k = i / (N - 1);
+      segs[i].setAttribute('cx', pts[i][0].toFixed(1));
+      segs[i].setAttribute('cy', pts[i][1].toFixed(1));
+      segs[i].setAttribute('r', (3 + 10 * k).toFixed(1));
+    }
+
+    const [hx, hy] = pts[N - 1];
+    const [px, py] = pts[N - 4];
+    const ang = Math.atan2(hy - py, hx - px) * 180 / Math.PI;
+    headG.setAttribute('transform', `translate(${hx.toFixed(1)},${hy.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(1.35)`);
+
+    hood.setAttribute('transform', `translate(-8,0) scale(${(rear * 1.1).toFixed(3)})`);
+    upper.setAttribute('transform', `rotate(${(-mouth * 30).toFixed(2)} -7 -4)`);
+    lower.setAttribute('transform', `rotate(${(mouth * 26).toFixed(2)} -7 3)`);
+    mouthIn.setAttribute('opacity', mouth.toFixed(3));
+    const fangOp = clamp((mouth - 0.6) * 2.5).toFixed(3);
+    fangs.forEach((f) => f.setAttribute('opacity', fangOp));
+
+    const flick = Math.max(0, Math.sin(t * 0.017));
+    const tl = t > 1900 && t < 3200 ? flick * (0.4 + 0.6 * mouth) : flick * 0.25 * rear;
+    tongue.setAttribute('transform', `translate(30,0) scale(${tl.toFixed(3)},1)`);
+
+    svg.style.opacity = (emerge * (1 - fade)).toFixed(3);
+  };
+
+  const flags = {};
+  const once = (key, t, at, fn) => {
+    if (!flags[key] && t >= at) { flags[key] = true; fn(); }
+  };
+
+  let start = null;
+  const loop = (now) => {
+    if (!running) return;
+    if (start === null) start = now;
+    const t = now - start;
+    frame(t);
+    once('ig', t, 1000, () => intro.classList.add('ig'));
+    once('impact', t, 3150, () => {
+      intro.classList.add('logo-in');
+      intro.classList.add('shock');
+    });
+    once('tag', t, 3500, () => intro.classList.add('tag-in'));
+    if (t >= 4600) { finish(); return; }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
 })();
 
 /* ---- Scroll reveal ---- */
@@ -482,48 +628,6 @@ new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) steps
   };
   size(); init(); draw();
   addEventListener('resize', () => { size(); init(); });
-})();
-
-/* ---- Yılan maskotu: gövde dalgası + dil titremesi ---- */
-(function () {
-  const NS = 'http://www.w3.org/2000/svg';
-  const g = document.getElementById('snakeBody');
-  const head = document.getElementById('snakeHead');
-  const tongue = document.getElementById('tongue');
-  if (!g || !head) return;
-
-  const N = 34, W = 1200, H = 240;
-  const circles = [];
-  for (let i = 0; i < N; i++) {
-    const c = document.createElementNS(NS, 'circle');
-    const k = i / (N - 1);
-    c.setAttribute('r', (4 + 12 * k).toFixed(1));
-    c.setAttribute('fill', i % 2 ? '#12b77a' : '#0a6b49');
-    g.appendChild(c);
-    circles.push(c);
-  }
-
-  const frame = (t) => {
-    const s = t / 1000;
-    let last = [0, 0], prev = [0, 0];
-    for (let i = 0; i < N; i++) {
-      const k = i / (N - 1);
-      const x = 70 + k * (W - 190);
-      const amp = 22 + 60 * k;
-      const y = H / 2 + Math.sin(s * 2.4 - k * 8) * amp * (0.5 + 0.5 * k) * 0.9;
-      circles[i].setAttribute('cx', x.toFixed(1));
-      circles[i].setAttribute('cy', y.toFixed(1));
-      if (i === N - 2) prev = [x, y];
-      if (i === N - 1) last = [x, y];
-    }
-    const ang = Math.atan2(last[1] - prev[1], last[0] - prev[0]) * 180 / Math.PI;
-    head.setAttribute('transform', `translate(${last[0].toFixed(1)},${last[1].toFixed(1)}) rotate(${ang.toFixed(1)})`);
-    const flick = Math.max(0, Math.sin(s * 5.5));
-    tongue.setAttribute('transform', `translate(16,0) scale(${(0.2 + flick * 0.8).toFixed(3)},1)`);
-    tongue.style.opacity = flick > 0.05 ? 1 : 0;
-    if (!reduce) requestAnimationFrame(frame);
-  };
-  requestAnimationFrame(frame);
 })();
 
 /* ---- Özel imleç: nokta + halka + yılan kuyruğu ---- */
