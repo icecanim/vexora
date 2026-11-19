@@ -84,6 +84,8 @@ html.has-cursor,html.has-cursor *{cursor:none!important}
 .nav nav a:not(.navbtn):hover::after{width:100%}
 .navbtn{border:1px solid var(--green2);color:var(--green);padding:8px 18px;border-radius:999px;font-size:14px;transition:background .25s,box-shadow .25s}
 .navbtn:hover{background:rgba(43,255,158,.12);box-shadow:0 0 18px rgba(43,255,158,.25)}
+.navghost{color:var(--muted);font-size:14px;transition:color .2s}
+.navghost:hover{color:var(--green)}
 
 /* ---------- BUTONLAR ---------- */
 .btn{position:relative;overflow:hidden;display:inline-block;padding:14px 28px;border-radius:999px;background:linear-gradient(135deg,var(--green),var(--green2));color:#03150d;font-weight:600;border:0;cursor:pointer;font-size:15px;transition:transform .25s,box-shadow .25s}
@@ -263,6 +265,7 @@ footer .brandf img{height:34px;width:auto}
     <a href="#surec">Süreç</a>
     <a href="#urunler">Ürünler</a>
     <a href="#sss">SSS</a>
+    <a id="authNav" class="navghost" href="/api/auth/discord">Giriş</a>
     <a id="discordNav" class="navbtn" href="#" target="_blank" rel="noopener">Discord</a>
   </nav>
 </header>
@@ -602,6 +605,17 @@ async function load() {
 }
 
 document.getElementById('year').textContent = new Date().getFullYear();
+/* ---- Yönetici oturumu: giriş yapıldıysa Giriş yerine Yönetim göster ---- */
+fetch('/api/auth/me', { cache: 'no-store' })
+  .then((r) => (r.ok ? r.json() : null))
+  .then((me) => {
+    if (!me) return;
+    const a = document.getElementById('authNav');
+    a.textContent = 'Yönetim';
+    a.href = '/yonetim';
+  })
+  .catch(() => {});
+
 load();
 </script>
 </body>
